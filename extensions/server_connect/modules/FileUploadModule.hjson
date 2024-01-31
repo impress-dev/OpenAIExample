@@ -1,0 +1,129 @@
+{
+  type: 'FileUploadModule_APIFileUploadAction',
+  module : 'FileUploadModule',
+  action : 'APIFileUploadAction',
+  groupTitle : 'API Connector',
+  groupIcon : 'fas fa-lg fa-exchange-alt comp-data',
+  title : 'API File Upload Action @@var(actionName)@@',
+  icon : 'fas fa-lg fa-file-upload comp-data',
+  
+  dataPickObject: true,
+   dataScheme: [
+       {name: 'response', type: 'text'}
+    ],
+  properties : [
+    {
+      group: 'Properties'
+      variables: [
+        { name: 'actionName', optionName: 'name', title: 'Name', type: 'text', required: true, defaultValue: ''},
+        { name: 'APIURL',required: true, optionName: 'APIURL', title: 'URL', type: 'text', defaultValue: '', serverDataBindings: true, allowPaste: true}
+        { name: 'dataType', optionName: 'dataType', title: 'Data Type', type: 'droplist', 
+          values: [
+            {title: 'Auto', value: 'auto' },
+            {title: 'Json', value: 'application/json' },
+            {title: 'Text', value: 'text/plain' },
+            {title: 'Form', value: 'multipart/form-data'}
+          ], defaultValue: 'auto'
+        },
+        { name: 'authorization', optionName: 'authorization', title: 'Authorization', type: 'droplist', 
+          values: [
+            {title: 'None', value: 'none', show:[], hide:['userName', 'userPass']},
+            {title: 'Basic', value: 'basic', show:['userName', 'userPass'], hide:[] }
+          ], defaultValue: 'None',
+        },
+
+        { name: 'userName', optionName: 'userName', title: 'Username', 
+        type: 'text',  defaultValue: '', serverDataBindings: true, allowPaste: true, required: true,
+        requiredField: 'authorization', requiredFieldValue: 'basic', initDisplay: 'none'},
+        { name: 'userPass', optionName: 'userPass', title: 'Password', 
+        type: 'text',  defaultValue: '',  serverDataBindings: true, allowPaste: true, required: true, 
+        requiredField: 'authorization', requiredFieldValue: 'basic', initDisplay: 'none'},
+        
+        { name: 'headers', optionName: 'headers', key: 'name', keyValue: 'value',
+        title: 'Headers', type: 'grid', defaultValue: {}, serverDataBindings: true,
+        columns: [
+          { field: 'name', caption: 'Name', size: '40%', editable: {type: 'text'} },
+          { field: 'value', caption: 'Value', size: '60%', allowJson: true, editable: {type: 'datapicker'} },
+        ],newRecord: { name: '', value: ''}
+		 		},
+        { name: 'output', optionName: 'output', title: 'Output', type: 'boolean', defaultValue: false }  
+      ]
+    },
+    {
+      group:'File Details',
+      variables:[
+        { name: 'uploadMethod',required: true, optionName: 'uploadMethod', title: 'Upload Method', type: 'droplist', 
+          values: [
+            {title: 'File and Data', value: 'fileAndData', show:['multipleFile','inputData'], hide:['filePath']},
+            {title: 'File Only', value: 'fileOnly', show:['filePath'], hide:['multipleFile','inputData','filesIndividual','fileNameForMultiple','filesMultipleGrid','filesMultipleArr','filesMultipleArrPath','filesMultipleSource']}
+          ], defaultValue: 'fileAndData',
+          help: 'File uploads are always done with POST HTTP Method.<br/><b>File and Data</b>: This allows you to upload files and some other POST data along with it.<br/><b>File Only</b>: This sends the request with file set as the POST body in binary format.'
+        },
+              
+        { name: 'filePath', optionName: 'path', title: 'Path', type: 'text', defaultValue: '', serverDataBindings: true, required: true, requiredField: 'uploadMethod', requiredFieldValue: 'fileOnly', initDisplay: 'none'},
+
+        { name: 'multipleFile', optionName: 'multipleFile', title: 'Multiple', type: 'droplist',required: true, requiredField: 'uploadMethod', requiredFieldValue: 'fileAndData', 
+          values: [
+            {title: 'No', value: 'no', show:['filesIndividual'], hide:['fileNameForMultiple','filesMultipleGrid','filesMultipleSource','filesMultipleArr', 'filesMultipleArrPath']},
+            {title: 'Yes', value: 'yes', show:['fileNameForMultiple','filesMultipleSource'], hide:['filesIndividual']}
+          ], defaultValue: '',
+          help: 'Files can be sent with a specific name. Select <b>Yes</b> if you want to upload multiple files with the same name. But, if you want to specify different names for one or more files, select <b>No</b>.'
+        },
+        
+
+        { name: 'filesIndividual', required: true, requiredField: 'uploadMethod', requiredFieldValue: 'individual', optionName: 'filesIndividual', key: 'name', keyValue: 'value',
+		 			title: 'Files', initDisplay: 'none', type: 'grid', defaultValue: {}, serverDataBindings: true, 
+					columns: [
+						{ field: 'name', caption: 'Name', size: '40%', editable: {type: 'text'} },
+						{ field: 'value', caption: 'Path', size: '60%', allowJson: true, editable: {type: 'datapicker'} },
+					],
+					newRecord: { name: '', value: ''},
+          help: 'Add each file to be uploaded in name-path pairs. Value can be a path to a file in the project folder or a URL.'},
+       
+         { name: 'fileNameForMultiple', optionName: 'fileNameForMultiple', title: 'File Name', type: 'text',  defaultValue: '', required: true, requiredField: 'multipleFile', requiredFieldValue: 'yes', initDisplay: 'none', help: 'Name to be used for uploading multiple files.'},
+
+          { name: 'filesMultipleSource', optionName: 'filesMultipleSource', title: 'Source', type: 'droplist', initDisplay: 'none',
+          values: [
+            {title: 'Grid', value: 'grid', show:['filesMultipleGrid'], hide:['filesMultipleArr', 'filesMultipleArrPath']},
+            {title: 'Array', value: 'array', show:['filesMultipleArr', 'filesMultipleArrPath'], hide:['filesMultipleGrid'] }
+          ], defaultValue: '',
+        },
+
+        { name: 'filesMultipleGrid', initDisplay: 'none', optionName: 'filesMultipleGrid', title: 'Files', type: 'grid', defaultValue: {}, serverDataBindings: true, 
+        columns: [
+          { field: 'value', caption: 'Path', size: '100%', allowJson: true, editable: {type: 'datapicker'} },
+        ], newRecord: { value: ''},
+        help: 'Add path for each file to be uploaded. Value can be a path to a file in the project folder or a URL.'
+        },
+         
+        { name: 'filesMultipleArr', optionName: 'filesMultipleArr', title: 'Files Array', 
+        type: 'text',  defaultValue: '', serverDataBindings: true,
+         initDisplay: 'none', help: 'Select a binding containing list of file paths. It can be a simple array of paths or a complex object like a query result.'}
+         { name: 'filesMultipleArrPath', optionName: 'filesMultipleArrPath', title: 'Path Key', 
+        type: 'text',  defaultValue: '', serverDataBindings: true, required: false,
+         initDisplay: 'none', help: 'Enter the name of the property in array which contains path of file to be uploaded. Required if array binding is a complex array.'}
+      ]
+    },
+    {
+      group: 'API Details',
+      variables:[
+        { name: 'queryData', optionName: 'queryData', key: 'name', keyValue: 'value',
+		 			title: 'Query', type: 'grid',defaultValue: {}, serverDataBindings: true,
+					columns: [
+						{ field: 'name', caption: 'Name', size: '40%', editable: {type: 'text'} },
+						{ field: 'value', caption: 'Value', size: '60%', allowJson: true, editable: {type: 'datapicker'} },
+					],
+					newRecord: { name: '', value: ''}
+		 		},
+        { name: 'inputData',  optionName: 'inputData', key: 'name', keyValue: 'value',
+		 			title: 'Input Data', type: 'grid',defaultValue: {}, serverDataBindings: true, 
+					columns: [
+						{ field: 'name', caption: 'Name', size: '40%', editable: {type: 'text'} },
+						{ field: 'value', caption: 'Value', size: '60%', allowJson: true, editable: {type: 'datapicker'} },
+					],
+					newRecord: { name: '', value: ''}
+		 		}
+      ]
+    }]
+  
+}
